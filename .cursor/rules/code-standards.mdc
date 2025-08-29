@@ -1,0 +1,94 @@
+---
+alwaysApply: true
+---
+
+# Laravel Project Coding Standards
+
+# === General ===
+- Code must be written in English (variables, methods, classes).
+- Comments and docblocks must be in English.
+- Follow PSR-12 coding style (Laravel default).
+- Maximum line length: 120 characters.
+- Indentation: 4 spaces.
+- Avoid unnecessary comments — code should be self-explanatory.
+
+# === Naming Conventions ===
+- Classes: PascalCase (e.g., UserController, OrderService).
+- Methods & functions: camelCase (e.g., getUserOrders()).
+- Variables: camelCase (e.g., $userName).
+- Constants: UPPER_CASE (e.g., MAX_ATTEMPTS).
+- Database tables: plural_snake_case (e.g., user_orders).
+- Eloquent models: singular PascalCase (e.g., User, Order).
+- Routes: kebab-case (e.g., /user-orders/create).
+
+# === Laravel Specific ===
+- Keep controllers thin: business logic must go into Services, Actions, or Jobs.
+- Use FormRequest classes for validation, never validate directly in controllers.
+- Always use Eloquent relationships instead of manual joins when possible.
+- Use dependency injection instead of Facades when possible (e.g., prefer `Request $request` over `Request::all()`).
+- Always use migrations for schema changes.
+- Use resource collections (API Resources) for API responses, not raw arrays.
+
+# === Security ===
+- Never trust user input, always validate.
+- Use Laravel’s built-in CSRF, XSS, and Auth protections.
+- Store secrets in .env, never in code.
+- Always use hashed passwords (`Hash::make`).
+- Avoid mass assignment by defining `$fillable` or `$guarded` in models.
+
+# === Testing ===
+- Write tests for new features (use PHPUnit / Pest).
+- Follow Arrange-Act-Assert pattern in tests.
+- Use factories for creating test data.
+- Controllers and services must have at least basic test coverage.
+
+# === Git / Code Review ===
+- Commit messages in English, format: <type>(scope): <message>
+  Example: feat(auth): add JWT login
+- No commented-out code in commits.
+- Keep PRs small and focused.
+# Laravel Project Coding Standards
+
+# === General ===
+- Code must be written in English (variables, methods, classes).
+- Comments and docblocks must be in English.
+- Follow PSR-12 coding style (Laravel default).
+- Maximum line length: 120 characters.
+- Indentation: 4 spaces.
+- Avoid unnecessary comments — code should be self-explanatory.
+
+# === Naming Conventions ===
+- Classes: PascalCase (e.g., UserController, OrderService).
+- Methods & functions: camelCase (e.g., getUserOrders()).
+- Variables: camelCase (e.g., $userName).
+- Constants: UPPER_CASE (e.g., MAX_ATTEMPTS).
+- Database tables: plural_snake_case (e.g., user_orders).
+- Eloquent models: singular PascalCase (e.g., User, Order).
+- Routes: kebab-case (e.g., /user-orders/create).
+
+# === Laravel Specific ===
+- Keep controllers thin: business logic must go into Services, Actions, or Jobs.
+- Use FormRequest classes for validation, never validate directly in controllers.
+- Always use Eloquent relationships instead of manual joins when possible.
+- Use dependency injection instead of Facades when possible (e.g., prefer `Request $request` over `Request::all()`).
+- Always use migrations for schema changes.
+- Use resource collections (API Resources) for API responses, not raw arrays.
+
+# === Security ===
+- Never trust user input, always validate.
+- Use Laravel’s built-in CSRF, XSS, and Auth protections.
+- Store secrets in .env, never in code.
+- Always use hashed passwords (`Hash::make`).
+- Avoid mass assignment by defining `$fillable` or `$guarded` in models.
+
+# === Testing ===
+- Write tests for new features (use PHPUnit / Pest).
+- Follow Arrange-Act-Assert pattern in tests.
+- Use factories for creating test data.
+- Controllers and services must have at least basic test coverage.
+
+# === Git / Code Review ===
+- Commit messages in English, format: <type>(scope): <message>
+  Example: feat(auth): add JWT login
+- No commented-out code in commits.
+- Keep PRs small and focused.
