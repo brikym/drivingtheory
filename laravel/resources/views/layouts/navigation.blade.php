@@ -13,25 +13,68 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                        {{ __('app.dashboard') }}
                     </x-nav-link>
                     <x-nav-link :href="route('test.index')" :active="request()->routeIs('test.index')">
-                        Test
+                        {{ __('app.test') }}
                     </x-nav-link>
                     <x-nav-link :href="route('test.history')" :active="request()->routeIs('test.history')">
-                        Historie testů
+                        {{ __('app.test_history') }}
                     </x-nav-link>
                     <x-nav-link :href="route('questions.index')" :active="request()->routeIs('questions.*')">
-                        Procházení otázek
+                        {{ __('app.browse_questions') }}
                     </x-nav-link>
                     <x-nav-link :href="route('admin.import.index')" :active="request()->routeIs('admin.*')">
-                        Import otázek
+                        {{ __('app.import_questions') }}
                     </x-nav-link>
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <!-- Language Selector & Settings Dropdown -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-4">
+                <!-- Language Selector -->
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                        <span class="mr-2">
+                            @if(session('locale', 'cs') === 'cs')
+                                🇨🇿
+                            @else
+                                🇬🇧
+                            @endif
+                        </span>
+                        <span>{{ session('locale', 'cs') === 'cs' ? 'Čeština' : 'English' }}</span>
+                        <div class="ms-1">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </button>
+
+                    <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                        <form method="POST" action="{{ route('language.switch') }}">
+                            @csrf
+                            <button type="submit" name="locale" value="cs" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                                <span class="mr-2">🇨🇿</span>
+                                Čeština
+                                @if(session('locale', 'cs') === 'cs')
+                                    <svg class="ml-auto h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                @endif
+                            </button>
+                            <button type="submit" name="locale" value="en" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                                <span class="mr-2">🇬🇧</span>
+                                English
+                                @if(session('locale', 'cs') === 'en')
+                                    <svg class="ml-auto h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                @endif
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -47,7 +90,7 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                            {{ __('app.profile') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -57,7 +100,7 @@
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                {{ __('app.logout') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -80,20 +123,48 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+                {{ __('app.dashboard') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('test.index')" :active="request()->routeIs('test.index')">
-                Test
+                {{ __('app.test') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('test.history')" :active="request()->routeIs('test.history')">
-                Historie testů
+                {{ __('app.test_history') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('questions.index')" :active="request()->routeIs('questions.*')">
-                Procházení otázek
+                {{ __('app.browse_questions') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.import.index')" :active="request()->routeIs('admin.*')">
-                Import otázek
+                {{ __('app.import_questions') }}
             </x-responsive-nav-link>
+        </div>
+
+        <!-- Responsive Language Selector -->
+        <div class="pt-4 pb-1 border-t border-gray-200">
+            <div class="px-4">
+                <div class="font-medium text-base text-gray-800 mb-2">Jazyk / Language</div>
+                <form method="POST" action="{{ route('language.switch') }}" class="space-y-2">
+                    @csrf
+                    <button type="submit" name="locale" value="cs" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md flex items-center">
+                        <span class="mr-2">🇨🇿</span>
+                        Čeština
+                        @if(session('locale', 'cs') === 'cs')
+                            <svg class="ml-auto h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        @endif
+                    </button>
+                    <button type="submit" name="locale" value="en" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md flex items-center">
+                        <span class="mr-2">🇬🇧</span>
+                        English
+                        @if(session('locale', 'cs') === 'en')
+                            <svg class="ml-auto h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        @endif
+                    </button>
+                </form>
+            </div>
         </div>
 
         <!-- Responsive Settings Options -->
@@ -105,7 +176,7 @@
 
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                    {{ __('app.profile') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
@@ -115,7 +186,7 @@
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        {{ __('app.logout') }}
                     </x-responsive-nav-link>
                 </form>
             </div>

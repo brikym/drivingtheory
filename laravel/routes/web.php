@@ -35,6 +35,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/test/cancel/{test}', [QuestionController::class, 'cancelTest'])->name('test.cancel');
     Route::delete('/test/delete/{test}', [QuestionController::class, 'deleteTest'])->name('test.delete');
     
+    // Language switching
+    Route::post('/language/switch', [App\Http\Controllers\LanguageController::class, 'switch'])->name('language.switch');
+    
     // Questions routes
     Route::get('/questions', [QuestionController::class, 'index'])->name('questions.index');
     Route::get('/questions/category/{category}', [QuestionController::class, 'showCategory'])->name('questions.category');

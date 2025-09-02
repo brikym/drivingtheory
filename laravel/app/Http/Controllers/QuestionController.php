@@ -23,15 +23,24 @@ class QuestionController extends Controller
 
         // Globální fulltextové vyhledávání
         if ($search && strlen($search) >= 3) {
-            $query->whereHas('questions.translations', function ($q) use ($search, $locale) {
-                $q->where('locale', $locale)
-                  ->where(function ($subQuery) use ($search) {
-                      $subQuery->where('text', 'LIKE', "%{$search}%")
-                               ->orWhere('explanation', 'LIKE', "%{$search}%");
-                  });
-            })->orWhereHas('questions.answers.translations', function ($q) use ($search, $locale) {
-                $q->where('locale', $locale)
-                  ->where('text', 'LIKE', "%{$search}%");
+            $query->where(function ($mainQuery) use ($search, $locale) {
+                // Pokud je hledaný text číslo, hledej podle kódu otázky
+                if (is_numeric($search)) {
+                    $mainQuery->whereHas('questions', function ($q) use ($search) {
+                        $q->where('question_code', 'LIKE', "%{$search}%");
+                    });
+                } else {
+                    $mainQuery->whereHas('questions.translations', function ($q) use ($search, $locale) {
+                        $q->where('locale', $locale)
+                          ->where(function ($subQuery) use ($search) {
+                              $subQuery->where('text', 'LIKE', "%{$search}%")
+                                       ->orWhere('explanation', 'LIKE', "%{$search}%");
+                          });
+                    })->orWhereHas('questions.answers.translations', function ($q) use ($search, $locale) {
+                        $q->where('locale', $locale)
+                          ->where('text', 'LIKE', "%{$search}%");
+                    });
+                }
             });
         }
 
@@ -44,16 +53,21 @@ class QuestionController extends Controller
             // Pokud se vyhledává, přidej filtrování
             if ($search && strlen($search) >= 3) {
                 $questionQuery->where(function ($mainQuery) use ($search, $locale) {
-                    $mainQuery->whereHas('translations', function ($q) use ($search, $locale) {
-                        $q->where('locale', $locale)
-                          ->where(function ($subQuery) use ($search) {
-                              $subQuery->where('text', 'LIKE', "%{$search}%")
-                                       ->orWhere('explanation', 'LIKE', "%{$search}%");
-                          });
-                    })->orWhereHas('answers.translations', function ($q) use ($search, $locale) {
-                        $q->where('locale', $locale)
-                          ->where('text', 'LIKE', "%{$search}%");
-                    });
+                    // Pokud je hledaný text číslo, hledej podle kódu otázky
+                    if (is_numeric($search)) {
+                        $mainQuery->where('question_code', 'LIKE', "%{$search}%");
+                    } else {
+                        $mainQuery->whereHas('translations', function ($q) use ($search, $locale) {
+                            $q->where('locale', $locale)
+                              ->where(function ($subQuery) use ($search) {
+                                  $subQuery->where('text', 'LIKE', "%{$search}%")
+                                           ->orWhere('explanation', 'LIKE', "%{$search}%");
+                              });
+                        })->orWhereHas('answers.translations', function ($q) use ($search, $locale) {
+                            $q->where('locale', $locale)
+                              ->where('text', 'LIKE', "%{$search}%");
+                        });
+                    }
                 });
             }
             
@@ -79,19 +93,24 @@ class QuestionController extends Controller
         // Fulltextové vyhledávání - filtruje pouze otázky obsahující hledaný text
         if ($search && strlen($search) >= 3) {
             $query->where(function ($mainQuery) use ($search, $locale) {
-                // Hledá v textu otázky nebo vysvětlení
-                $mainQuery->whereHas('translations', function ($q) use ($search, $locale) {
-                    $q->where('locale', $locale)
-                      ->where(function ($subQuery) use ($search) {
-                          $subQuery->where('text', 'LIKE', "%{$search}%")
-                                   ->orWhere('explanation', 'LIKE', "%{$search}%");
-                      });
-                })
-                // NEBO hledá v odpovědích
-                ->orWhereHas('answers.translations', function ($q) use ($search, $locale) {
-                    $q->where('locale', $locale)
-                      ->where('text', 'LIKE', "%{$search}%");
-                });
+                // Pokud je hledaný text číslo, hledej podle kódu otázky
+                if (is_numeric($search)) {
+                    $mainQuery->where('question_code', 'LIKE', "%{$search}%");
+                } else {
+                    // Hledá v textu otázky nebo vysvětlení
+                    $mainQuery->whereHas('translations', function ($q) use ($search, $locale) {
+                        $q->where('locale', $locale)
+                          ->where(function ($subQuery) use ($search) {
+                              $subQuery->where('text', 'LIKE', "%{$search}%")
+                                       ->orWhere('explanation', 'LIKE', "%{$search}%");
+                          });
+                    })
+                    // NEBO hledá v odpovědích
+                    ->orWhereHas('answers.translations', function ($q) use ($search, $locale) {
+                        $q->where('locale', $locale)
+                          ->where('text', 'LIKE', "%{$search}%");
+                    });
+                }
             });
         }
 

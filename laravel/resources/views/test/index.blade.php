@@ -4,8 +4,8 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-4xl mx-auto">
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-900 mb-4">Test z Autoškoly</h1>
-            <p class="text-xl text-gray-600">Vyberte typ vozidla pro test</p>
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ __('app.test') }}</h1>
+            <p class="text-xl text-gray-600">{{ __('app.select_vehicle_type') }}</p>
         </div>
 
         @php
@@ -18,28 +18,28 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-semibold text-yellow-800 mb-2">
-                            Máte aktivní test
+                            {{ __('app.in_progress') }}
                         </h3>
                         <p class="text-yellow-700">
-                            Test pro {{ $activeTest->vehicle_type == 'automobil' ? 'automobil' : 'motocykl' }} 
-                            - {{ $activeTest->getCurrentQuestionIndex() }}/{{ $activeTest->total_questions }} otázek
+                            {{ __('app.test') }} {{ __('app.vehicle_type') }}: {{ $activeTest->vehicle_type == 'automobil' ? __('app.automobile') : __('app.motorcycle') }} 
+                            - {{ $activeTest->getCurrentQuestionIndex() }}/{{ $activeTest->total_questions }} {{ __('app.question') }}
                         </p>
                         <p class="text-sm text-yellow-600 mt-1">
-                            Zbývající čas: {{ gmdate('i:s', $activeTest->getRemainingTime()) }}
+                            {{ __('app.remaining_time') }}: {{ gmdate('i:s', $activeTest->getRemainingTime()) }}
                         </p>
                     </div>
                     <div class="flex space-x-3">
                         <a href="{{ route('test.question') }}" 
                            class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
-                            Pokračovat v testu
+                            {{ __('app.continue_test') }}
                         </a>
                         <form method="POST" action="{{ route('test.cancel', $activeTest) }}" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" 
                                     class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
-                                    onclick="return confirm('Opravdu chcete zrušit tento test? Tato akce je nevratná.')">
-                                Zrušit test
+                                    onclick="return confirm('{{ __("app.confirm_delete") }}')">
+                                {{ __('app.cancel_test') }}
                             </button>
                         </form>
                     </div>
@@ -57,10 +57,9 @@
                     </svg>
                 </div>
                 <div class="p-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Motocykl</h2>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ __('app.motorcycle') }}</h2>
                     <p class="text-gray-600 mb-6">
-                        Test pro řidičské oprávnění skupiny A (motocykly). 
-                        Obsahuje otázky specifické pro jízdu na motocyklu.
+                        {{ __('app.test') }} {{ __('app.motorcycle') }}
                     </p>
                     <div class="space-y-3 mb-6">
                         <div class="flex items-center text-sm text-gray-500">
@@ -86,7 +85,7 @@
                         @csrf
                         <input type="hidden" name="vehicle_type" value="motocykl">
                         <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200">
-                            Začít test - Motocykl
+                            {{ __('app.start_test') }} - {{ __('app.motorcycle') }}
                         </button>
                     </form>
                 </div>
@@ -100,10 +99,9 @@
                     </svg>
                 </div>
                 <div class="p-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Automobil</h2>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ __('app.automobile') }}</h2>
                     <p class="text-gray-600 mb-6">
-                        Test pro řidičské oprávnění skupiny B (osobní automobily). 
-                        Obsahuje otázky pro jízdu osobním automobilem.
+                        {{ __('app.test') }} {{ __('app.automobile') }}
                     </p>
                     <div class="space-y-3 mb-6">
                         <div class="flex items-center text-sm text-gray-500">
@@ -129,7 +127,7 @@
                         @csrf
                         <input type="hidden" name="vehicle_type" value="automobil">
                         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200">
-                            Začít test - Automobil
+                            {{ __('app.start_test') }} - {{ __('app.automobile') }}
                         </button>
                     </form>
                 </div>

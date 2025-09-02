@@ -7,18 +7,18 @@
         <div class="mb-8">
             <div class="flex justify-between items-center mb-4">
                 <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-600">Otázka {{ $currentQuestionIndex + 1 }} z {{ count($questions) }}</span>
+                    <span class="text-sm text-gray-600">{{ __('app.question') }} {{ $currentQuestionIndex + 1 }} {{ __('app.of') }} {{ count($questions) }}</span>
                     @php
                         $answeredCount = $test->testAnswers()->count();
                         $totalCount = count($questions);
                     @endphp
                     <span class="text-sm text-gray-600">
-                        Zodpovězeno: <span class="font-medium text-green-600">{{ $answeredCount }}</span>/{{ $totalCount }}
+                        {{ __('app.answered') }}: <span class="font-medium text-green-600">{{ $answeredCount }}</span>/{{ $totalCount }}
                     </span>
                 </div>
                 <div class="text-right">
                     <div class="text-sm font-medium" id="remainingTime">
-                        Zbývající čas: <span id="timeDisplay">{{ floor($remainingTime / 60) }}:{{ str_pad($remainingTime % 60, 2, '0', STR_PAD_LEFT) }}</span>
+                        {{ __('app.remaining_time') }}: <span id="timeDisplay">{{ floor($remainingTime / 60) }}:{{ str_pad($remainingTime % 60, 2, '0', STR_PAD_LEFT) }}</span>
                     </div>
                 </div>
             </div>
@@ -123,7 +123,7 @@
                         @if($currentQuestionIndex > 0)
                             <a href="{{ route('test.question', ['q' => $currentQuestionIndex]) }}" 
                                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
-                                ← Předchozí
+                                ← {{ __('app.previous_question') }}
                             </a>
                         @endif
                     </div>
@@ -133,7 +133,7 @@
                         @if($currentQuestionIndex + 1 < count($questions))
                             <a href="{{ route('test.question', ['q' => $currentQuestionIndex + 2]) }}" 
                                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
-                                Další →
+                                {{ __('app.next_question') }} →
                             </a>
                         @endif
                         
@@ -148,7 +148,7 @@
                             <button type="button" 
                                     id="finish-test-btn"
                                     class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-200">
-                                Dokončit test
+                                {{ __('app.finish_test') }}
                             </button>
                         @endif
                     </div>
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const finishBtn = document.getElementById('finish-test-btn');
     if (finishBtn) {
         finishBtn.addEventListener('click', function() {
-            if (confirm('Opravdu chcete dokončit test?')) {
+            if (confirm('{{ __("app.confirm") }}')) {
                 // Odeslat POST požadavek pro dokončení testu
                 fetch('{{ route("test.finish") }}', {
                     method: 'POST',

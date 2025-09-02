@@ -1,0 +1,111 @@
+<?php
+
+return [
+    // Navigation
+    'dashboard' => 'Dashboard',
+    'test' => 'Test',
+    'test_history' => 'Test History',
+    'browse_questions' => 'Browse Questions',
+    'import_questions' => 'Import Questions',
+    'profile' => 'Profile',
+    'logout' => 'Log Out',
+    
+    // Test
+    'start_test' => 'Start Test',
+    'continue_test' => 'Continue Test',
+    'cancel_test' => 'Cancel Test',
+    'finish_test' => 'Finish Test',
+    'previous_question' => 'Previous',
+    'next_question' => 'Next',
+    'submit_answer' => 'Submit Answer',
+    'question' => 'Question',
+    'of' => 'of',
+    'answered' => 'Answered',
+    'remaining_time' => 'Remaining Time',
+    'time_expired' => 'Time Expired',
+    'completed' => 'Completed',
+    'cancelled' => 'Cancelled',
+    'in_progress' => 'In Progress',
+    
+    // Test types
+    'vehicle_type' => 'Vehicle Type',
+    'automobile' => 'Automobile',
+    'motorcycle' => 'Motorcycle',
+    'select_vehicle_type' => 'Select Vehicle Type',
+    
+    // Test results
+    'test_result' => 'Test Result',
+    'points_earned' => 'Points Earned',
+    'total_points' => 'Total Points',
+    'percentage' => 'Percentage',
+    'passed' => 'Passed',
+    'failed' => 'Failed',
+    'correct_answer' => 'Correct Answer',
+    'your_answer' => 'Your Answer',
+    'points' => 'points',
+    
+    // Test history
+    'test_history_title' => 'Test History',
+    'no_tests' => 'You have not taken any tests yet',
+    'show_result' => 'Show Result',
+    'repeat_test' => 'Repeat Test',
+    'delete_test' => 'Delete Test',
+    'points_development' => 'Points Development Over Time',
+    'date_time' => 'Date and Time',
+    'points_count' => 'Number of Points',
+    'confirm_delete' => 'Are you sure you want to delete this test? This action cannot be undone.',
+    'test_deleted' => 'Test was successfully deleted',
+    'test_cancelled' => 'Test was successfully cancelled',
+    
+    // Questions
+    'questions' => 'Questions',
+    'categories' => 'Categories',
+    'search_questions' => 'Search questions...',
+    'no_questions_found' => 'No questions found',
+    'questions_in_category' => 'questions in category',
+    'search_results' => 'Search Results',
+    
+    // Common
+    'save' => 'Save',
+    'cancel' => 'Cancel',
+    'delete' => 'Delete',
+    'edit' => 'Edit',
+    'create' => 'Create',
+    'back' => 'Back',
+    'next' => 'Next',
+    'previous' => 'Previous',
+    'loading' => 'Loading...',
+    'error' => 'Error',
+    'success' => 'Success',
+    'warning' => 'Warning',
+    'info' => 'Information',
+    'yes' => 'Yes',
+    'no' => 'No',
+    'confirm' => 'Confirm',
+    
+    // Messages
+    'test_started' => 'Test was successfully started',
+    'test_completed' => 'Test was completed',
+    'test_time_expired' => 'Test time has expired',
+    'answer_saved' => 'Answer was saved',
+    'all_questions_answered' => 'All questions have been answered',
+    'no_active_test' => 'No active test found',
+    'test_not_found' => 'Test not found',
+    'unauthorized_test' => 'You do not have permission for this test',
+    'cannot_cancel_active_test' => 'Cannot cancel active test',
+    'cannot_delete_active_test' => 'Cannot delete active test',
+    'questions_not_answered' => 'Not all questions are answered',
+    
+    // Time
+    'minutes' => 'minutes',
+    'seconds' => 'seconds',
+    'hours' => 'hours',
+    
+    // Status
+    'status' => 'Status',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'pending' => 'Pending',
+    'approved' => 'Approved',
+    'rejected' => 'Rejected',
+];

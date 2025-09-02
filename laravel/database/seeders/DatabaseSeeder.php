@@ -27,5 +27,8 @@ class DatabaseSeeder extends Seeder
         
         // Seed přiřazení otázek ke kategoriím
         $this->call(QuestionCategorySeeder::class);
+        
+        // Seed test data pro uživatele ID 2
+        $this->call(TestDataSeeder::class);
     }
 }
