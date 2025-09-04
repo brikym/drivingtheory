@@ -25,6 +25,7 @@ class User extends Authenticatable
         'google_id',
         'facebook_id',
         'avatar',
+        'role',
     ];
 
     /**
@@ -62,5 +63,37 @@ class User extends Authenticatable
             ->where('started_at', '>', now()->subHours(2)) // Test je aktivní max 2 hodiny
             ->latest()
             ->first();
+    }
+
+    /**
+     * Zkontroluje, zda má uživatel danou roli
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    /**
+     * Zkontroluje, zda je uživatel admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    /**
+     * Zkontroluje, zda je uživatel demo
+     */
+    public function isDemo(): bool
+    {
+        return $this->hasRole('demo');
+    }
+
+    /**
+     * Zkontroluje, zda je uživatel standardní uživatel
+     */
+    public function isUser(): bool
+    {
+        return $this->hasRole('user');
     }
 }

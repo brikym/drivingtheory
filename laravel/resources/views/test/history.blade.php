@@ -60,9 +60,8 @@
                                         {{ $test->completed_at ? $test->completed_at->format('d.m.Y H:i') : 'N/A' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                            {{ $test->vehicle_type === 'automobil' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800' }}">
-                                            {{ $test->vehicle_type === 'automobil' ? 'Automobil' : 'Motocykl' }}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ $test->vehicle_type }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -146,19 +145,21 @@
                                                 </form>
                                             @endif
                                             
-                                            {{-- Smazat test --}}
-                                            <form method="POST" action="{{ route('test.delete', $test) }}" class="inline" 
-                                                  onsubmit="return confirm('Opravdu chcete smazat tento test? Tato akce je nevratná.')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" 
-                                                        class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-md transition-colors duration-200"
-                                                        title="Smazat test">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                    </svg>
-                                                </button>
-                                            </form>
+                                            {{-- Smazat test - pouze pro admin --}}
+                                            @if(auth()->user()->isAdmin())
+                                                <form method="POST" action="{{ route('test.delete', $test) }}" class="inline" 
+                                                      onsubmit="return confirm('Opravdu chcete smazat tento test? Tato akce je nevratná.')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" 
+                                                            class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-md transition-colors duration-200"
+                                                            title="Smazat test">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -249,7 +250,7 @@
                                 const test = completedTests[context.dataIndex];
                                 return [
                                     `Body: ${context.parsed.y}`,
-                                    `Typ: ${test.vehicleType === 'automobil' ? 'Automobil' : 'Motocykl'}`,
+                                    `Skupina: ${test.vehicleType}`,
                                     `Status: ${test.status === 'completed' ? 'Dokončen' : 'Vypršel čas'}`
                                 ];
                             }

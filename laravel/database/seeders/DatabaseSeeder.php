@@ -30,5 +30,8 @@ class DatabaseSeeder extends Seeder
         
         // Seed test data pro uživatele ID 2
         $this->call(TestDataSeeder::class);
+        
+        // Seed admin uživatele
+        $this->call(AdminSeeder::class);
     }
 }

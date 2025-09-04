@@ -128,7 +128,8 @@ class QuestionController extends Controller
     {
         $vehicleType = $request->get('vehicle_type');
         
-        if (!in_array($vehicleType, ['automobil', 'motocykl'])) {
+        $validVehicleTypes = ['A', 'B', 'C', 'D', 'B+E', 'C+E', 'D+E'];
+        if (!in_array($vehicleType, $validVehicleTypes)) {
             return redirect()->route('test.index')->with('error', 'Neplatný typ vozidla');
         }
 
@@ -167,7 +168,8 @@ class QuestionController extends Controller
 
     private function getTestConfig($vehicleType)
     {
-        // Konfigurace je stejná pro oba typy vozidel
+        // Prozatím stejná konfigurace pro všechny typy vozidel
+        // V budoucnu lze rozšířit o specifické konfigurace pro jednotlivé skupiny
         return [
             'pravidla_provozu' => ['count' => 10, 'points' => 2, 'categories' => [1]],
             'dopravni_znacky' => ['count' => 3, 'points' => 1, 'categories' => [5]],
@@ -583,9 +585,9 @@ class QuestionController extends Controller
 
     public function deleteTest(Test $test)
     {
-        // Ověřit, že test patří aktuálnímu uživateli
-        if ($test->user_id !== Auth::id()) {
-            return redirect()->route('test.history')->with('error', 'Nemáte oprávnění k tomuto testu');
+        // Ověřit, že uživatel je admin
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->route('test.history')->with('error', 'Nemáte oprávnění k mazání testů');
         }
 
         // Ověřit, že test není aktivní
@@ -643,5 +645,37 @@ class QuestionController extends Controller
         }
 
         return $questions;
+    }
+
+    public function autoCompleteTest(Test $test)
+    {
+        // Ověřit, že test patří aktuálnímu uživateli
+        if ($test->user_id !== Auth::id()) {
+            return response()->json(['error' => 'Nemáte oprávnění k tomuto testu'], 403);
+        }
+
+        // Ověřit, že test je aktivní
+        if (!$test->isInProgress()) {
+            return response()->json(['error' => 'Test není aktivní'], 400);
+        }
+
+        // Automaticky dokončit test s časovým vypršením
+        $earnedPoints = $test->testAnswers()->sum('points_earned');
+        $percentage = $test->total_points > 0 ? ($earnedPoints / $test->total_points) * 100 : 0;
+        $passed = $percentage >= 86; // 86% = 43 bodů z 50
+
+        $test->update([
+            'status' => 'expired',
+            'earned_points' => $earnedPoints,
+            'percentage' => $percentage,
+            'passed' => $passed,
+            'completed_at' => now(),
+            'time_expired' => true,
+        ]);
+
+        // Vyčistit session
+        session()->forget(['test_questions', 'test_current_question']);
+
+        return response()->json(['success' => true, 'message' => 'Test byl automaticky ukončen']);
     }
 }

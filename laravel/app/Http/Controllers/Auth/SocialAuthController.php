@@ -47,6 +47,7 @@ class SocialAuthController extends Controller
                     $provider . '_id' => $socialUser->getId(),
                     'email_verified_at' => now(),
                     'password' => bcrypt(str()->random(20)), // Náhodné heslo
+                    'role' => 'user',
                 ]);
             }
 
