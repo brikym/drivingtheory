@@ -15,7 +15,7 @@
         </div>
 
         @if($tests->count() > 0)
-            {{-- Graf vývoje bodů --}}
+            
             <div class="bg-white rounded-lg shadow-md p-6 mb-8">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">Vývoj bodů v čase</h2>
                 <div class="h-64">
@@ -123,7 +123,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex space-x-2">
                                             @if($test->status !== 'cancelled')
-                                                {{-- Zobrazit výsledek --}}
+                                                
                                                 <a href="{{ route('test.result.show', $test) }}" 
                                                    class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-2 rounded-md transition-colors duration-200"
                                                    title="Zobrazit výsledek">
@@ -133,7 +133,7 @@
                                                     </svg>
                                                 </a>
                                                 
-                                                {{-- Zopakovat test --}}
+                                                
                                                 <form method="POST" action="{{ route('test.repeat', $test) }}" class="inline">
                                                     @csrf
                                                     <button type="submit" 
@@ -146,7 +146,7 @@
                                                 </form>
                                             @endif
                                             
-                                            {{-- Smazat test --}}
+                                            
                                             <form method="POST" action="{{ route('test.delete', $test) }}" class="inline" 
                                                   onsubmit="return confirm('Opravdu chcete smazat tento test? Tato akce je nevratná.')">
                                                 @csrf
@@ -168,7 +168,7 @@
                 </div>
             </div>
 
-            {{-- Paginace --}}
+            
             <div class="mt-8">
                 {{ $tests->links() }}
             </div>
@@ -194,15 +194,13 @@
 </div>
 
 @if($tests->count() > 0)
-    {{-- Chart.js CDN --}}
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Příprava dat pro graf
         const testData = @json($chartData);
 
-        // Filtrovat pouze dokončené testy (ne zrušené)
         const completedTests = testData.filter(test => test.status !== 'cancelled');
 
         if (completedTests.length === 0) {

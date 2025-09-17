@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-    {{-- Hero sekce --}}
+    
     <div class="container mx-auto px-4 py-16">
         <div class="text-center">
             <h1 class="text-6xl font-bold text-gray-900 mb-6">
@@ -39,7 +39,7 @@
         </div>
     </div>
 
-    {{-- Funkce --}}
+    
     <div class="bg-white py-16">
         <div class="container mx-auto px-4">
             <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">
@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    {{-- Statistiky --}}
+    
     <div class="bg-gray-50 py-16">
         <div class="container mx-auto px-4">
             <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">
@@ -117,7 +117,7 @@
         </div>
     </div>
 
-    {{-- CTA sekce --}}
+    
     <div class="bg-blue-600 py-16">
         <div class="container mx-auto px-4 text-center">
             <h2 class="text-4xl font-bold text-white mb-6">

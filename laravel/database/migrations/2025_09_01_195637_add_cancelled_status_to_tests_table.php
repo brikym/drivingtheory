@@ -21,7 +21,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Vrátit původní enum hodnoty
         DB::statement("ALTER TABLE tests MODIFY COLUMN status ENUM('in_progress', 'completed', 'expired') DEFAULT 'in_progress'");
     }
 };

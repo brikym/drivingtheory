@@ -18,7 +18,7 @@
         @endif
     </div>
 
-    {{-- Informace o výsledcích vyhledávání --}}
+    
     @if($search)
         <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p class="text-blue-800">
@@ -114,7 +114,7 @@
         </div>
     @endif
 
-    {{-- Navigace stránkování --}}
+    
     @if($questions->hasPages())
         <div class="mt-8">
             <div class="flex items-center justify-between">
@@ -124,7 +124,7 @@
                 </div>
                 
                 <div class="flex space-x-2">
-                    {{-- Předchozí stránka --}}
+                    
                     @if($questions->onFirstPage())
                         <span class="px-3 py-2 text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">
                             ← Předchozí
@@ -136,7 +136,7 @@
                         </a>
                     @endif
 
-                    {{-- Čísla stránek --}}
+                    
                     <div class="flex space-x-1">
                         @php
                             $currentPage = $questions->currentPage();
@@ -144,18 +144,16 @@
                             $start = max(1, $currentPage - 2);
                             $end = min($lastPage, $currentPage + 2);
                             
-                            // Pokud jsme blízko začátku, zobrazíme více stránek na konci
                             if ($currentPage <= 3) {
                                 $end = min($lastPage, 5);
                             }
                             
-                            // Pokud jsme blízko konce, zobrazíme více stránek na začátku
                             if ($currentPage > $lastPage - 3) {
                                 $start = max(1, $lastPage - 4);
                             }
                         @endphp
 
-                        {{-- První stránka --}}
+                        
                         @if($start > 1)
                             <a href="{{ $questions->url(1) }}" 
                                class="px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200">
@@ -166,7 +164,7 @@
                             @endif
                         @endif
 
-                        {{-- Střední stránky --}}
+                        
                         @for($page = $start; $page <= $end; $page++)
                             @if($page == $currentPage)
                                 <span class="px-3 py-2 text-white bg-blue-600 rounded-md">
@@ -180,7 +178,7 @@
                             @endif
                         @endfor
 
-                        {{-- Poslední stránka --}}
+                        
                         @if($end < $lastPage)
                             @if($end < $lastPage - 1)
                                 <span class="px-3 py-2 text-gray-500">...</span>
@@ -192,7 +190,7 @@
                         @endif
                     </div>
 
-                    {{-- Další stránka --}}
+                    
                     @if($questions->hasMorePages())
                         <a href="{{ $questions->nextPageUrl() }}" 
                            class="px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200">

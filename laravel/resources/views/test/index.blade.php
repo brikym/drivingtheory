@@ -13,7 +13,6 @@
         @endphp
 
         @if($activeTest)
-            {{-- Aktivní test --}}
             <div class="mb-8 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
                 <div class="flex items-center justify-between">
                     <div>
@@ -25,7 +24,7 @@
                             - {{ $activeTest->getCurrentQuestionIndex() }}/{{ $activeTest->total_questions }} {{ __('app.question') }}
                         </p>
                         <p class="text-sm text-yellow-600 mt-1">
-                            {{ __('app.remaining_time') }}: {{ gmdate('i:s', $activeTest->getRemainingTime()) }}
+                            {{ __('app.remaining_time') }}: <span id="remainingTimeDisplay">{{ gmdate('i:s', $activeTest->getRemainingTime()) }}</span>
                         </p>
                     </div>
                     <div class="flex space-x-3">
@@ -49,7 +48,6 @@
 
         @if(!$activeTest)
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {{-- Motocykl --}}
             <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                 <div class="h-48 bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
                     <svg class="w-24 h-24 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -91,7 +89,6 @@
                 </div>
             </div>
 
-            {{-- Automobil --}}
             <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                 <div class="h-48 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
                     <svg class="w-24 h-24 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -135,7 +132,6 @@
         </div>
         @endif
 
-        {{-- Informace o testu --}}
         <div class="mt-12 bg-gray-50 rounded-xl p-8">
             <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Informace o testu</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -170,4 +166,35 @@
         </div>
     </div>
 </div>
+
+@if($activeTest)
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const testStartTime = new Date('{{ $activeTest->started_at->toISOString() }}');
+    const timeLimitMinutes = {{ $activeTest->time_limit_minutes }};
+    const timeDisplay = document.getElementById('remainingTimeDisplay');
+    
+    function updateTime() {
+        const now = new Date();
+        const elapsedSeconds = Math.floor((now - testStartTime) / 1000);
+        const totalTimeSeconds = timeLimitMinutes * 60;
+        const remainingTime = Math.max(0, totalTimeSeconds - elapsedSeconds);
+        
+        if (remainingTime <= 0) {
+            timeDisplay.textContent = '0:00';
+            window.location.reload();
+            return;
+        }
+        
+        const minutes = Math.floor(remainingTime / 60);
+        const seconds = remainingTime % 60;
+        timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    updateTime();
+    setInterval(updateTime, 1000);
+});
+</script>
+@endif
+
 @endsection

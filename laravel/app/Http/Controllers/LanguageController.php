@@ -12,7 +12,6 @@ class LanguageController extends Controller
     {
         $locale = $request->input('locale');
         
-        // Ověřit, že je podporovaný jazyk
         if (in_array($locale, ['cs', 'en'])) {
             Session::put('locale', $locale);
             App::setLocale($locale);

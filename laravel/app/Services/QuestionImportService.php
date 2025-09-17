@@ -169,7 +169,6 @@ class QuestionImportService
             $mediaUrl = $fullMediaUrl ? basename($fullMediaUrl) : null;
             $rawMediaType = $this->stringOrNull($media['mediaFormatCode'] ?? $media['mediaType'] ?? null);
             
-            // Normalizuj mediaType na obecné kategorie
             $mediaType = $this->normalizeMediaType($rawMediaType);
         } elseif (is_string($media)) {
             $mediaUrl = basename($this->stringOrNull($media));
@@ -180,7 +179,6 @@ class QuestionImportService
             return null;
         }
 
-        // Zajisti, že mediaType není null
         if ($mediaType === null) {
             $mediaType = 'unknown';
         }
@@ -214,20 +212,17 @@ class QuestionImportService
 
         $type = strtolower(trim($rawType));
 
-        // Video formáty
         if (str_contains($type, 'video') || str_contains($type, 'mp4') || str_contains($type, 'avi') || 
             str_contains($type, 'mov') || str_contains($type, 'wmv') || str_contains($type, 'flv')) {
             return 'video';
         }
 
-        // Obrázkové formáty
         if (str_contains($type, 'image') || str_contains($type, 'jpg') || str_contains($type, 'jpeg') || 
             str_contains($type, 'png') || str_contains($type, 'gif') || str_contains($type, 'bmp') || 
             str_contains($type, 'webp') || str_contains($type, 'svg')) {
             return 'image';
         }
 
-        // Audio formáty
         if (str_contains($type, 'audio') || str_contains($type, 'mp3') || str_contains($type, 'wav') || 
             str_contains($type, 'ogg') || str_contains($type, 'aac')) {
             return 'audio';

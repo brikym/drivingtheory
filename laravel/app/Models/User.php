@@ -59,7 +59,6 @@ class User extends Authenticatable
     {
         return $this->tests()
             ->where('status', 'in_progress')
-            ->where('started_at', '>', now()->subHours(2)) // Test je aktivní max 2 hodiny
             ->latest()
             ->first();
     }

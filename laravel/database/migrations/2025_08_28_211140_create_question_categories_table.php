@@ -17,11 +17,9 @@ return new class extends Migration
             $table->unsignedBigInteger('category_id');
             $table->timestamps();
 
-            // Indexy pro lepší výkon
             $table->index(['question_id']);
             $table->index(['category_id']);
             
-            // Unikátní kombinace question_id a category_id
             $table->unique(['question_id', 'category_id'], 'unique_question_category');
             
             // Foreign key constraints

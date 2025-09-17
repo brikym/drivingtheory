@@ -29,24 +29,20 @@ class SocialAuthController extends Controller
         try {
             $socialUser = Socialite::driver($provider)->user();
             
-            // Najít existujícího uživatele podle emailu
             $user = User::where('email', $socialUser->getEmail())->first();
 
             if ($user) {
-                // Uživatel už existuje, jen aktualizujeme social ID
                 $user->update([
                     $provider . '_id' => $socialUser->getId(),
                     'avatar' => $socialUser->getAvatar(),
                 ]);
             } else {
-                // Vytvořit nového uživatele
                 $user = User::create([
                     'name' => $socialUser->getName(),
                     'email' => $socialUser->getEmail(),
                     'avatar' => $socialUser->getAvatar(),
                     $provider . '_id' => $socialUser->getId(),
                     'email_verified_at' => now(),
-                    'password' => bcrypt(str()->random(20)), // Náhodné heslo
                 ]);
             }
 

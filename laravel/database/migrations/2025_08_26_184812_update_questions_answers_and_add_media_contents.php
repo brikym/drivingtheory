@@ -19,10 +19,8 @@ return new class extends Migration {
             $table->bigInteger('external_id')->nullable()->after('id');            
         });
 
-        // Nová tabulka media_contents
         Schema::create('media_contents', function (Blueprint $table) {
             $table->id();            
-            $table->unsignedBigInteger('model_id'); // ID otázky nebo odpovědi
             $table->string('media_type')->nullable(); // image, video, audio, ...
             $table->string('media_url')->nullable();  // cesta k souboru            
             $table->timestamps();

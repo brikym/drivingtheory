@@ -16,7 +16,7 @@
             @endif
         </div>
 
-        {{-- Hlavní výsledek --}}
+        
         <div class="bg-white rounded-lg shadow-md p-8 mb-8">
             <div class="text-center">
                 @if($test->passed)
@@ -60,7 +60,7 @@
             </div>
         </div>
 
-        {{-- Detailní výsledky --}}
+        
         <div class="bg-white rounded-lg shadow-md p-8">
             <h3 class="text-2xl font-bold text-gray-900 mb-6">Detailní výsledky</h3>
             
@@ -87,7 +87,7 @@
                         
                         <p class="text-gray-700 mb-2">{{ $question->translations->first()->text ?? 'N/A' }}</p>
                         
-                        {{-- Media content pro otázku --}}
+                        
                         @if($question->mediaContent || $question->mediaContents->count() > 0)
                             <div class="mb-3">
                                 @if($question->mediaContent)
@@ -126,7 +126,7 @@
                                 {{ $testAnswer->selectedAnswer->translations->first()->text ?? 'Neznámá odpověď' }}
                             </span>
                             
-                            {{-- Media content pro vybranou odpověď --}}
+                            
                             @if($testAnswer->selectedAnswer->mediaContent || $testAnswer->selectedAnswer->mediaContents->count() > 0)
                                 <div class="mt-2">
                                     @if($testAnswer->selectedAnswer->mediaContent)
@@ -168,7 +168,7 @@
                                 @endphp
                                 <span class="text-green-600">{{ $correctAnswer->translations->first()->text ?? 'Neznámá odpověď' }}</span>
                                 
-                                {{-- Media content pro správnou odpověď --}}
+                                
                                 @if($correctAnswer && ($correctAnswer->mediaContent || $correctAnswer->mediaContents->count() > 0))
                                     <div class="mt-2">
                                         @if($correctAnswer->mediaContent)
@@ -207,7 +207,7 @@
             </div>
         </div>
 
-        {{-- Akce --}}
+        
         <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <a href="{{ route('test.index') }}" 
                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-200">

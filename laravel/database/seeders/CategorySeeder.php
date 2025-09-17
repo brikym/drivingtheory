@@ -32,14 +32,12 @@ class CategorySeeder extends Seeder
         ];
 
         foreach ($categories as $categoryData) {
-            // Vytvoř kategorii
             $category = Category::create([
                 'code' => $categoryData['code'],
                 'slug' => $this->generateSlug($categoryData['name']),
                 'is_active' => true,
             ]);
 
-            // Vytvoř překlad kategorie
             CategoryTranslation::create([
                 'category_id' => $category->id,
                 'locale' => 'cs',

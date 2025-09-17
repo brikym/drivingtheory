@@ -67,7 +67,6 @@ class Test extends Model
             return 0;
         }
 
-        // Počítat čas od started_at - 30 minut od začátku testu
         $elapsed = now()->timestamp - $this->started_at->timestamp;
         $totalTimeLimit = $this->time_limit_minutes * 60;
         $remaining = $totalTimeLimit - $elapsed;

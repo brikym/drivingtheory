@@ -14,17 +14,14 @@ class QuestionController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $locale = 'cs'; // Prozatím jen čeština
         
         $query = Category::where('is_active', true)
             ->with(['translations' => function ($query) use ($locale) {
                 $query->where('locale', $locale);
             }]);
 
-        // Globální fulltextové vyhledávání
         if ($search && strlen($search) >= 3) {
             $query->where(function ($mainQuery) use ($search, $locale) {
-                // Pokud je hledaný text číslo, hledej podle kódu otázky
                 if (is_numeric($search)) {
                     $mainQuery->whereHas('questions', function ($q) use ($search) {
                         $q->where('question_code', 'LIKE', "%{$search}%");
@@ -46,14 +43,11 @@ class QuestionController extends Controller
 
         $categories = $query->get();
 
-        // Přidat dynamický počet otázek pro každou kategorii
         $categories->each(function ($category) use ($search, $locale) {
             $questionQuery = $category->questions()->where('is_active', true);
             
-            // Pokud se vyhledává, přidej filtrování
             if ($search && strlen($search) >= 3) {
                 $questionQuery->where(function ($mainQuery) use ($search, $locale) {
-                    // Pokud je hledaný text číslo, hledej podle kódu otázky
                     if (is_numeric($search)) {
                         $mainQuery->where('question_code', 'LIKE', "%{$search}%");
                     } else {
@@ -80,7 +74,6 @@ class QuestionController extends Controller
     public function showCategory(Category $category, Request $request)
     {
         $search = $request->get('search');
-        $locale = 'cs'; // Prozatím jen čeština
         
         $query = $category->questions()
             ->where('is_active', true)
@@ -90,14 +83,11 @@ class QuestionController extends Controller
                 $query->where('locale', $locale);
             }, 'answers.mediaContent', 'mediaContent']);
 
-        // Fulltextové vyhledávání - filtruje pouze otázky obsahující hledaný text
         if ($search && strlen($search) >= 3) {
             $query->where(function ($mainQuery) use ($search, $locale) {
-                // Pokud je hledaný text číslo, hledej podle kódu otázky
                 if (is_numeric($search)) {
                     $mainQuery->where('question_code', 'LIKE', "%{$search}%");
                 } else {
-                    // Hledá v textu otázky nebo vysvětlení
                     $mainQuery->whereHas('translations', function ($q) use ($search, $locale) {
                         $q->where('locale', $locale)
                           ->where(function ($subQuery) use ($search) {
@@ -105,7 +95,6 @@ class QuestionController extends Controller
                                        ->orWhere('explanation', 'LIKE', "%{$search}%");
                           });
                     })
-                    // NEBO hledá v odpovědích
                     ->orWhereHas('answers.translations', function ($q) use ($search, $locale) {
                         $q->where('locale', $locale)
                           ->where('text', 'LIKE', "%{$search}%");
@@ -121,6 +110,20 @@ class QuestionController extends Controller
 
     public function test()
     {
+        $activeTest = Auth::user()->getActiveTest();
+        
+        if ($activeTest && $activeTest->isTimeExpired()) {
+            $activeTest->update([
+                'status' => 'expired',
+                'time_expired' => true,
+                'completed_at' => now()
+            ]);
+            
+            session()->forget(['test_id', 'test_questions', 'test_current_question']);
+            
+            return redirect()->route('test.result')->with('time_expired', true);
+        }
+        
         return view('test.index');
     }
 
@@ -132,19 +135,15 @@ class QuestionController extends Controller
             return redirect()->route('test.index')->with('error', 'Neplatný typ vozidla');
         }
 
-        // Zkontrolovat, zda uživatel nemá aktivní test
         $activeTest = Auth::user()->getActiveTest();
         if ($activeTest) {
             return redirect()->route('test.question')->with('info', 'Máte aktivní test. Pokračujete v něm.');
         }
 
-        // Definice testů podle typu vozidla
         $testConfig = $this->getTestConfig($vehicleType);
         
-        // Vybrat otázky podle konfigurace
         $selectedQuestions = $this->selectQuestionsForTest($testConfig);
         
-        // Vytvořit test v databázi
         $test = Test::create([
             'user_id' => Auth::id(),
             'vehicle_type' => $vehicleType,
@@ -155,7 +154,6 @@ class QuestionController extends Controller
             'total_points' => array_sum(array_map(function($q) { return $q['points']; }, $selectedQuestions)),
         ]);
 
-        // Uložit otázky do session pro rychlý přístup
         session([
             'test_id' => $test->id,
             'test_questions' => $selectedQuestions,
@@ -167,7 +165,6 @@ class QuestionController extends Controller
 
     private function getTestConfig($vehicleType)
     {
-        // Konfigurace je stejná pro oba typy vozidel
         return [
             'pravidla_provozu' => ['count' => 10, 'points' => 2, 'categories' => [1]],
             'dopravni_znacky' => ['count' => 3, 'points' => 1, 'categories' => [5]],
@@ -218,7 +215,6 @@ class QuestionController extends Controller
             }
         }
 
-        // Zamíchat otázky
         shuffle($selectedQuestions);
         
         return $selectedQuestions;
@@ -226,14 +222,12 @@ class QuestionController extends Controller
 
     public function showQuestion(Request $request)
     {
-        // Zkusit najít aktivní test z databáze nebo session
         $test = $this->getCurrentTest();
         
         if (!$test) {
             return redirect()->route('test.index')->with('error', 'Žádný aktivní test nenalezen');
         }
 
-        // Kontrola časového limitu
         if ($test->isTimeExpired()) {
             $test->update([
                 'status' => 'expired',
@@ -243,29 +237,21 @@ class QuestionController extends Controller
             return redirect()->route('test.result')->with('time_expired', true);
         }
 
-        // Čas se počítá od started_at, není potřeba aktualizovat
-
         $questions = session('test_questions');
         
-        // Pokud nejsou otázky v session, načteme je z databáze
         if (!$questions) {
             $questions = $this->loadQuestionsFromTestAnswers($test);
             session(['test_questions' => $questions]);
         }
 
-
-
-        // Získat číslo otázky z parametru nebo použít aktuální
         $questionNumber = $request->get('q', 1);
         $currentQuestionIndex = max(0, min($questionNumber - 1, count($questions) - 1));
         
-        // Aktualizovat aktuální otázku v session
         session(['test_current_question' => $currentQuestionIndex]);
 
         $currentQuestion = $questions[$currentQuestionIndex];
         $remainingTime = $test->getRemainingTime();
         
-        // Zkontrolovat, zda je aktuální otázka zodpovězena
         $selectedAnswer = $test->testAnswers()->where('question_id', $currentQuestion['id'])->first();
         $selectedAnswerId = $selectedAnswer ? $selectedAnswer->selected_answer_id : null;
         
@@ -283,7 +269,6 @@ class QuestionController extends Controller
             return redirect()->route('test.index')->with('error', 'Žádný aktivní test nenalezen');
         }
 
-        // Kontrola časového limitu
         if ($test->isTimeExpired()) {
             $test->update([
                 'status' => 'expired',
@@ -298,7 +283,6 @@ class QuestionController extends Controller
 
         $questions = session('test_questions');
         
-        // Pokud nejsou otázky v session, načteme je z databáze
         if (!$questions) {
             $questions = $this->loadQuestionsFromTestAnswers($test);
             session(['test_questions' => $questions]);
@@ -307,7 +291,6 @@ class QuestionController extends Controller
         $questionId = $request->get('question_id');
         $selectedAnswerId = $request->get('answer_id');
         
-        // Najít aktuální otázku
         $currentQuestion = collect($questions)->firstWhere('id', $questionId);
         if (!$currentQuestion) {
             if ($request->expectsJson()) {
@@ -316,14 +299,11 @@ class QuestionController extends Controller
             return redirect()->route('test.question')->with('error', 'Otázka nenalezena');
         }
         
-        // Najít správnou odpověď
         $correctAnswer = collect($currentQuestion['answers'])->firstWhere('is_correct', true);
         $isCorrect = $correctAnswer && $correctAnswer['id'] == $selectedAnswerId;
         
-        // Zkontrolovat, zda už není odpověď uložena
         $existingAnswer = $test->testAnswers()->where('question_id', $questionId)->first();
         if ($existingAnswer) {
-            // Aktualizovat existující odpověď
             $existingAnswer->update([
                 'selected_answer_id' => $selectedAnswerId,
                 'is_correct' => $isCorrect,
@@ -331,7 +311,6 @@ class QuestionController extends Controller
                 'answered_at' => now(),
             ]);
         } else {
-            // Vytvořit novou odpověď
             TestAnswer::create([
                 'test_id' => $test->id,
                 'question_id' => $questionId,
@@ -343,7 +322,6 @@ class QuestionController extends Controller
             ]);
         }
         
-        // Aktualizovat skóre v testu
         $newScore = $test->testAnswers()->sum('points_earned');
         $test->update(['earned_points' => $newScore]);
         
@@ -379,19 +357,16 @@ class QuestionController extends Controller
         $totalQuestions = count($questions);
         $answeredQuestions = $test->testAnswers()->count();
         
-        // Zkontrolovat, zda jsou všechny otázky zodpovězeny
         if ($answeredQuestions < $totalQuestions) {
             return redirect()->route('test.question')->with('error', 'Nejsou zodpovězeny všechny otázky');
         }
 
-        // Dokončit test
         $this->completeTest($test);
         return redirect()->route('test.result');
     }
 
     public function showResult()
     {
-        // Zkusit najít test z session nebo databáze
         $testId = session('test_id');
         if ($testId) {
             $test = Test::where('id', $testId)
@@ -428,7 +403,6 @@ class QuestionController extends Controller
 
     private function getCurrentTest(): ?Test
     {
-        // Zkusit najít test z session
         $testId = session('test_id');
         if ($testId) {
             $test = Test::find($testId);
@@ -437,7 +411,6 @@ class QuestionController extends Controller
             }
         }
 
-        // Zkusit najít aktivní test z databáze
         return Auth::user()->getActiveTest();
     }
 
@@ -445,7 +418,6 @@ class QuestionController extends Controller
     {
         $earnedPoints = $test->testAnswers()->sum('points_earned');
         $percentage = $test->total_points > 0 ? ($earnedPoints / $test->total_points) * 100 : 0;
-        $passed = $percentage >= 86; // 86% = 43 bodů z 50
 
         $test->update([
             'status' => 'completed',
@@ -455,7 +427,6 @@ class QuestionController extends Controller
             'completed_at' => now()
         ]);
 
-        // Vyčistit session, ale zachovat test_id pro zobrazení výsledků
         session()->forget(['test_questions', 'test_current_question']);
     }
 
@@ -466,10 +437,9 @@ class QuestionController extends Controller
             ->orderBy('completed_at', 'desc')
             ->paginate(10);
 
-        // Příprava dat pro graf - seřadit od nejstaršího po nejnovější
         $allTests = Auth::user()->tests()
             ->whereIn('status', ['completed', 'expired', 'cancelled'])
-            ->orderBy('completed_at', 'asc') // Od nejstaršího po nejnovější
+            ->orderBy('completed_at', 'asc')
             ->get();
 
         $chartData = $allTests->map(function($test, $index) {
@@ -488,18 +458,15 @@ class QuestionController extends Controller
 
     public function repeatTest(Test $test)
     {
-        // Ověřit, že test patří aktuálnímu uživateli
         if ($test->user_id !== Auth::id()) {
             return redirect()->route('test.history')->with('error', 'Nemáte oprávnění k tomuto testu');
         }
 
-        // Zkontrolovat, zda uživatel nemá aktivní test
         $activeTest = Auth::user()->getActiveTest();
         if ($activeTest) {
             return redirect()->route('test.question')->with('info', 'Máte aktivní test. Dokončete ho před zahájením nového.');
         }
 
-        // Vytvořit nový test se stejnou konfigurací
         $newTest = Test::create([
             'user_id' => Auth::id(),
             'vehicle_type' => $test->vehicle_type,
@@ -510,11 +477,9 @@ class QuestionController extends Controller
             'total_points' => $test->total_points,
         ]);
 
-        // Vybrat nové otázky podle stejné konfigurace
         $testConfig = $this->getTestConfig($test->vehicle_type);
         $selectedQuestions = $this->selectQuestionsForTest($testConfig);
 
-        // Uložit otázky do session
         session([
             'test_id' => $newTest->id,
             'test_questions' => $selectedQuestions,
@@ -526,17 +491,14 @@ class QuestionController extends Controller
 
     public function showTestResult(Test $test)
     {
-        // Ověřit, že test patří aktuálnímu uživateli
         if ($test->user_id !== Auth::id()) {
             return redirect()->route('test.history')->with('error', 'Nemáte oprávnění k tomuto testu');
         }
 
-        // Ověřit, že test je dokončený (ne zrušený)
         if (!$test->isCompleted() && !$test->isExpired()) {
             return redirect()->route('test.history')->with('error', 'Test ještě není dokončen');
         }
 
-        // Zrušené testy nemají výsledky
         if ($test->status === 'cancelled') {
             return redirect()->route('test.history')->with('error', 'Zrušené testy nemají výsledky');
         }
@@ -556,17 +518,14 @@ class QuestionController extends Controller
 
     public function cancelTest(Test $test)
     {
-        // Ověřit, že test patří aktuálnímu uživateli
         if ($test->user_id !== Auth::id()) {
             return redirect()->route('test.index')->with('error', 'Nemáte oprávnění k tomuto testu');
         }
 
-        // Ověřit, že test je aktivní
         if (!$test->isInProgress()) {
             return redirect()->route('test.index')->with('error', 'Test nelze zrušit - není aktivní');
         }
 
-        // Označit test jako zrušený místo smazání
         $test->update([
             'status' => 'cancelled',
             'completed_at' => now(),
@@ -575,7 +534,6 @@ class QuestionController extends Controller
             'passed' => false,
         ]);
 
-        // Vyčistit session
         session()->forget(['test_id', 'test_questions', 'test_current_question']);
 
         return redirect()->route('test.index')->with('success', 'Test byl úspěšně zrušen');
@@ -583,17 +541,14 @@ class QuestionController extends Controller
 
     public function deleteTest(Test $test)
     {
-        // Ověřit, že test patří aktuálnímu uživateli
         if ($test->user_id !== Auth::id()) {
             return redirect()->route('test.history')->with('error', 'Nemáte oprávnění k tomuto testu');
         }
 
-        // Ověřit, že test není aktivní
         if ($test->isInProgress()) {
             return redirect()->route('test.history')->with('error', 'Nelze smazat aktivní test');
         }
 
-        // Smazat test (cascade delete smaže i test_answers)
         $test->delete();
 
         return redirect()->route('test.history')->with('success', 'Test byl úspěšně smazán');
@@ -616,7 +571,6 @@ class QuestionController extends Controller
         foreach ($testAnswers as $testAnswer) {
             $question = $testAnswer->question;
             
-            // Načíst odpovědi pro otázku
             $answers = $question->answers()
                 ->with(['translations', 'mediaContent', 'mediaContents'])
                 ->get()

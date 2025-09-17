@@ -4,7 +4,7 @@
 <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-8">Procházení otázek</h1>
     
-    {{-- Globální vyhledávací pole --}}
+    
     <div class="mb-8">
         <form method="GET" action="{{ route('questions.index') }}" class="max-w-md">
             <div class="relative">
@@ -34,7 +34,7 @@
         </form>
     </div>
 
-    {{-- Informace o výsledcích vyhledávání --}}
+    
     @if(request('search'))
         <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p class="text-blue-800">
@@ -92,19 +92,15 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('input', function() {
         const value = this.value.trim();
         
-        // Zrušit předchozí timeout
         clearTimeout(searchTimeout);
         
-        // Pokud je méně než 3 znaky, nehledat
         if (value.length < 3 && value.length > 0) {
             return;
         }
         
-        // Pokud je 3+ znaků nebo prázdné, hledat po 1000ms (1 sekunda)
         searchTimeout = setTimeout(() => {
             if (!isSubmitting) {
                 isSubmitting = true;
-                // Přidat indikátor načítání
                 searchInput.style.opacity = '0.6';
                 searchInput.placeholder = 'Vyhledávám...';
                 form.submit();
@@ -112,7 +108,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1000);
     });
     
-    // Enter okamžitě vyhledá
     searchInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -124,7 +119,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Reset flag při načtení stránky
     window.addEventListener('pageshow', function() {
         isSubmitting = false;
         searchInput.style.opacity = '1';

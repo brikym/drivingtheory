@@ -3,7 +3,6 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-4xl mx-auto">
-        {{-- Navigační panel a čas --}}
         <div class="mb-8">
             <div class="flex justify-between items-center mb-4">
                 <div class="flex items-center space-x-4">
@@ -23,13 +22,11 @@
                 </div>
             </div>
             
-            {{-- Navigační panel s čísly otázek --}}
             <div class="bg-white rounded-lg shadow-sm border p-4">
                 <div class="flex flex-wrap gap-2 justify-center">
                     @for($i = 1; $i <= count($questions); $i++)
                         @php
                             $isCurrent = $i == ($currentQuestionIndex + 1);
-                            // Zkontrolovat, zda je otázka zodpovězena pomocí databáze
                             $isAnswered = $test->testAnswers()->where('question_id', $questions[$i-1]['id'])->exists();
                         @endphp
                         <a href="{{ route('test.question', ['q' => $i]) }}" 
@@ -44,7 +41,6 @@
             </div>
         </div>
 
-        {{-- Otázka --}}
         <div class="bg-white rounded-lg shadow-md p-8 mb-6">
             <div class="flex items-start justify-between mb-6">
                 <h2 class="text-2xl font-bold text-gray-900">
@@ -82,7 +78,6 @@
                 </div>
             @endif
 
-            {{-- Odpovědi --}}
             <div id="question-form" class="space-y-4">
                 <input type="hidden" id="question_id" value="{{ $currentQuestion['id'] }}">
                 <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
@@ -119,7 +114,6 @@
 
                 <div class="flex justify-between items-center pt-6">
                     <div class="flex space-x-4">
-                        {{-- Předchozí otázka --}}
                         @if($currentQuestionIndex > 0)
                             <a href="{{ route('test.question', ['q' => $currentQuestionIndex]) }}" 
                                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
@@ -129,7 +123,6 @@
                     </div>
                     
                     <div class="flex space-x-4">
-                        {{-- Další otázka --}}
                         @if($currentQuestionIndex + 1 < count($questions))
                             <a href="{{ route('test.question', ['q' => $currentQuestionIndex + 2]) }}" 
                                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
@@ -143,7 +136,6 @@
                             $allQuestionsAnswered = $answeredQuestions >= $totalQuestions;
                         @endphp
                         
-                        {{-- Dokončit test --}}
                         @if($allQuestionsAnswered)
                             <button type="button" 
                                     id="finish-test-btn"
@@ -160,14 +152,22 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let remainingTime = {{ $remainingTime }};
+    const initialRemainingTime = {{ $remainingTime }};
+    const testStartTime = new Date('{{ $test->started_at->toISOString() }}');
+    const timeLimitMinutes = {{ $test->time_limit_minutes }};
+    
     const timeDisplay = document.getElementById('timeDisplay');
     const remainingTimeDiv = document.getElementById('remainingTime');
     
     function updateTime() {
+        const now = new Date();
+        const elapsedSeconds = Math.floor((now - testStartTime) / 1000);
+        const totalTimeSeconds = timeLimitMinutes * 60;
+        const remainingTime = Math.max(0, totalTimeSeconds - elapsedSeconds);
+        
         if (remainingTime <= 0) {
-            // Čas vypršel, přesměrovat na výsledky
-            window.location.href = '{{ route("test.result") }}';
+            timeDisplay.textContent = '0:00';
+            window.location.reload();
             return;
         }
         
@@ -175,23 +175,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const seconds = remainingTime % 60;
         timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         
-        // Změnit barvu při nízkém čase
-        if (remainingTime <= 300) { // 5 minut
+        if (remainingTime <= 300) {
             remainingTimeDiv.classList.add('text-red-600');
-            remainingTimeDiv.classList.remove('text-gray-600');
-        } else if (remainingTime <= 600) { // 10 minut
+            remainingTimeDiv.classList.remove('text-gray-600', 'text-yellow-600');
+        } else if (remainingTime <= 600) {
             remainingTimeDiv.classList.add('text-yellow-600');
-            remainingTimeDiv.classList.remove('text-gray-600');
+            remainingTimeDiv.classList.remove('text-gray-600', 'text-red-600');
+        } else {
+            remainingTimeDiv.classList.add('text-gray-600');
+            remainingTimeDiv.classList.remove('text-red-600', 'text-yellow-600');
         }
-        
-        remainingTime--;
     }
     
-    // Aktualizovat čas každou sekundu
     updateTime();
     setInterval(updateTime, 1000);
 
-    // Automatické ukládání odpovědí
     const answerOptions = document.querySelectorAll('.answer-option');
     const questionId = document.getElementById('question_id').value;
     const csrfToken = document.getElementById('csrf_token').value;
@@ -203,7 +201,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (this.checked) {
                 const answerId = this.value;
                 
-                // Odeslat odpověď na server
                 fetch('{{ route("test.answer") }}', {
                     method: 'POST',
                     headers: {
@@ -219,37 +216,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Odpověď byla uložena, přesměrovat na další otázku
                         setTimeout(() => {
                             const currentQuestionNumber = {{ $currentQuestionIndex + 1 }};
                             
                             if (data.all_answered) {
-                                // Všechny otázky zodpovězeny, zobrazit tlačítko dokončit
                                 window.location.reload();
                             } else if (currentQuestionNumber < data.total_questions) {
-                                // Přesměrovat na další otázku
                                 window.location.href = '{{ route("test.question") }}?q=' + (currentQuestionNumber + 1);
                             } else {
-                                // Jsme na poslední otázce, ale ne všechny jsou zodpovězeny
-                                // Najít první nezodpovězenou otázku
                                 window.location.href = '{{ route("test.question") }}?q=1';
                             }
                         }, 500);
                     }
                 })
                 .catch(error => {
-                    console.error('Chyba při ukládání odpovědi:', error);
+                    console.error('Error saving answer:', error);
                 });
             }
         });
     });
 
-    // Dokončit test
     const finishBtn = document.getElementById('finish-test-btn');
     if (finishBtn) {
         finishBtn.addEventListener('click', function() {
             if (confirm('{{ __("app.confirm") }}')) {
-                // Odeslat POST požadavek pro dokončení testu
                 fetch('{{ route("test.finish") }}', {
                     method: 'POST',
                     headers: {
@@ -262,12 +252,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (response.ok) {
                         window.location.href = '{{ route("test.result") }}';
                     } else {
-                        alert('Chyba při dokončování testu');
+                        alert('Error finishing test');
                     }
                 })
                 .catch(error => {
-                    console.error('Chyba při dokončování testu:', error);
-                    alert('Chyba při dokončování testu');
+                    console.error('Error finishing test:', error);
+                    alert('Error finishing test');
                 });
             }
         });

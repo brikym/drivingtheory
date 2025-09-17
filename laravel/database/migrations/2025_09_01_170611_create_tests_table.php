@@ -22,7 +22,6 @@ return new class extends Migration
             $table->unsignedTinyInteger('total_questions');
             $table->unsignedTinyInteger('total_points');
             $table->unsignedTinyInteger('earned_points')->nullable();
-            $table->decimal('percentage', 5, 2)->nullable(); // např. 85.50
             $table->boolean('passed')->nullable();
             $table->boolean('time_expired')->default(false);
             $table->timestamps();

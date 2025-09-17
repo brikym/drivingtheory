@@ -16,13 +16,11 @@ class TestDataSeeder extends Seeder
     {
         $userId = 2;
         
-        // Zkontrolovat, zda uživatel existuje
         if (!\App\Models\User::find($userId)) {
             $this->command->error("Uživatel s ID {$userId} neexistuje!");
             return;
         }
 
-        // Získat všechny otázky pro generování testů
         $allQuestions = Question::with(['answers', 'categories'])->get();
         
         if ($allQuestions->isEmpty()) {
@@ -32,12 +30,10 @@ class TestDataSeeder extends Seeder
 
         $this->command->info("Generuji 20 testů pro uživatele ID {$userId}...");
 
-        // Generovat 10 úspěšných testů
         for ($i = 1; $i <= 10; $i++) {
             $this->generateTest($userId, $allQuestions, true, $i);
         }
 
-        // Generovat 10 neúspěšných testů
         for ($i = 1; $i <= 10; $i++) {
             $this->generateTest($userId, $allQuestions, false, $i + 10);
         }
@@ -47,14 +43,11 @@ class TestDataSeeder extends Seeder
 
     private function generateTest($userId, $allQuestions, $shouldPass, $testNumber)
     {
-        // Náhodně vybrat typ vozidla
         $vehicleTypes = ['automobil', 'motocykl'];
         $vehicleType = $vehicleTypes[array_rand($vehicleTypes)];
 
-        // Definovat konfiguraci testů podle typu vozidla
         $testConfig = $this->getTestConfig($vehicleType);
         
-        // Vybrat otázky podle konfigurace
         $selectedQuestions = $this->selectQuestionsForTest($allQuestions, $testConfig);
         
         if ($selectedQuestions->isEmpty()) {
@@ -62,19 +55,14 @@ class TestDataSeeder extends Seeder
             return;
         }
 
-        // Vytvořit test
         $test = Test::create([
             'user_id' => $userId,
             'vehicle_type' => $vehicleType,
             'status' => 'completed',
             'started_at' => Carbon::now()->subDays(rand(1, 30))->subHours(rand(0, 23))->subMinutes(rand(0, 59)),
-            'completed_at' => null, // Nastavíme později
             'time_limit_minutes' => 30,
             'total_questions' => $selectedQuestions->count(),
             'total_points' => $selectedQuestions->sum('points'),
-            'earned_points' => 0, // Nastavíme později
-            'percentage' => 0, // Nastavíme později
-            'passed' => false, // Nastavíme později
             'time_expired' => false,
         ]);
 
@@ -88,14 +76,12 @@ class TestDataSeeder extends Seeder
                 continue;
             }
 
-            // Najít správnou odpověď
             $correctAnswer = $answers->where('is_correct', true)->first();
             
             if (!$correctAnswer) {
                 continue;
             }
 
-            // Rozhodnout, zda odpovědět správně nebo špatně
             $shouldAnswerCorrectly = $this->shouldAnswerCorrectly($shouldPass, $answeredQuestions, $selectedQuestions->count());
             
             $selectedAnswer = $shouldAnswerCorrectly ? $correctAnswer : $answers->where('is_correct', false)->random();
@@ -109,7 +95,6 @@ class TestDataSeeder extends Seeder
             $totalEarnedPoints += $pointsEarned;
             $answeredQuestions++;
 
-            // Vytvořit odpověď
             TestAnswer::create([
                 'test_id' => $test->id,
                 'question_id' => $question->id,
@@ -121,11 +106,8 @@ class TestDataSeeder extends Seeder
             ]);
         }
 
-        // Vypočítat výsledky
         $percentage = $test->total_points > 0 ? ($totalEarnedPoints / $test->total_points) * 100 : 0;
-        $passed = $percentage >= 86; // 86% = 43 bodů z 50
 
-        // Aktualizovat test s výsledky
         $test->update([
             'completed_at' => $test->started_at->addMinutes(rand(15, 30)),
             'earned_points' => $totalEarnedPoints,
@@ -139,7 +121,6 @@ class TestDataSeeder extends Seeder
 
     private function getTestConfig($vehicleType)
     {
-        // Stejná konfigurace jako v QuestionController
         return [
             'Pravidla provozu na pozemních komunikacích' => ['count' => 10, 'points' => 2],
             'Dopravní značky' => ['count' => 3, 'points' => 1],
@@ -156,7 +137,6 @@ class TestDataSeeder extends Seeder
         $selectedQuestions = collect();
 
         foreach ($testConfig as $categoryName => $config) {
-            // Najít kategorii
             $category = Category::whereHas('translations', function($query) use ($categoryName) {
                 $query->where('name', $categoryName);
             })->first();
@@ -166,7 +146,6 @@ class TestDataSeeder extends Seeder
                 continue;
             }
 
-            // Najít otázky v této kategorii
             $categoryQuestions = $allQuestions->filter(function($question) use ($category) {
                 return $question->categories->contains($category);
             });
@@ -176,11 +155,9 @@ class TestDataSeeder extends Seeder
                 continue;
             }
 
-            // Vybrat náhodné otázky z kategorie
             $questionsToSelect = min($config['count'], $categoryQuestions->count());
             $selectedCategoryQuestions = $categoryQuestions->random($questionsToSelect);
 
-            // Nastavit body pro otázky
             foreach ($selectedCategoryQuestions as $question) {
                 $question->points = $config['points'];
             }
@@ -190,7 +167,6 @@ class TestDataSeeder extends Seeder
             $this->command->info("Kategorie '{$categoryName}': vybráno {$questionsToSelect} otázek z {$categoryQuestions->count()} dostupných");
         }
 
-        // Pokud nemáme dostatek otázek, doplníme náhodnými otázkami
         if ($selectedQuestions->count() < 20) {
             $remainingQuestions = $allQuestions->diff($selectedQuestions);
             $neededQuestions = 25 - $selectedQuestions->count();
@@ -198,7 +174,6 @@ class TestDataSeeder extends Seeder
             if ($remainingQuestions->count() > 0) {
                 $additionalQuestions = $remainingQuestions->random(min($neededQuestions, $remainingQuestions->count()));
                 
-                // Nastavit body pro doplňkové otázky (výchozí 2 body)
                 foreach ($additionalQuestions as $question) {
                     $question->points = 2;
                 }
@@ -214,14 +189,11 @@ class TestDataSeeder extends Seeder
     private function shouldAnswerCorrectly($shouldPass, $currentQuestion, $totalQuestions)
     {
         if ($shouldPass) {
-            // Pro úspěšné testy: odpovědět správně v 90-100% případů
             $correctRate = 0.9 + (rand(0, 10) / 100); // 90-100%
         } else {
-            // Pro neúspěšné testy: odpovědět správně v 60-85% případů
             $correctRate = 0.6 + (rand(0, 25) / 100); // 60-85%
         }
 
-        // Přidat malou náhodnost
         $randomFactor = rand(0, 100) / 100;
         
         return $randomFactor < $correctRate;
