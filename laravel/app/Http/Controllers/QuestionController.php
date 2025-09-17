@@ -14,6 +14,7 @@ class QuestionController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
+        $locale = 'cs';
         
         $query = Category::where('is_active', true)
             ->with(['translations' => function ($query) use ($locale) {
@@ -74,6 +75,7 @@ class QuestionController extends Controller
     public function showCategory(Category $category, Request $request)
     {
         $search = $request->get('search');
+        $locale = 'cs';
         
         $query = $category->questions()
             ->where('is_active', true)
