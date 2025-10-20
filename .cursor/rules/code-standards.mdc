@@ -6,7 +6,7 @@ alwaysApply: true
 
 # === General ===
 - Code must be written in English (variables, methods, classes).
-- Comments and docblocks must be in English.
+- Do not write comments!
 - Follow PSR-12 coding style (Laravel default).
 - Maximum line length: 120 characters.
 - Indentation: 4 spaces.
